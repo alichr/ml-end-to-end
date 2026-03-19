@@ -217,17 +217,17 @@ ml-end-to-end/
 
 ### Tasks
 
-1. **Download the dataset**
+1. ~~**Download the dataset**~~ ✅
    - Kaggle "Dogs vs Cats" dataset (~25,000 images)
    - Write `src/data/download.py` — automated, idempotent download script
 
-2. **Set up DVC (Data Version Control)**
+2. ~~**Set up DVC (Data Version Control)**~~ ✅
    - `dvc init`, configure remote storage (Google Drive or S3 free tier)
    - Track `data/raw/` with DVC
    - Learn: `dvc add`, `dvc push`, `dvc pull`
    - **Why DVC matters:** your teammate can reproduce your exact dataset with `dvc pull`
 
-3. **Exploratory Data Analysis (EDA)** — `notebooks/01_eda.ipynb`
+3. ~~**Exploratory Data Analysis (EDA)**~~ ✅ — `notebooks/01_eda.ipynb`
    - Total image count per class (check for imbalance)
    - Image size distribution (min, max, mean width/height)
    - Sample grid: display 16 random cats, 16 random dogs

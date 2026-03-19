@@ -98,6 +98,72 @@ The `.editorconfig` ensures consistent formatting across editors (4-space indent
 
 ---
 
+## Phase 2: Data Pipeline
+
+### Step 1 — Download the Dataset
+
+The dataset is the Microsoft Cats vs Dogs dataset (~25,000 images) from Kaggle.
+
+**Prerequisites:**
+1. Create a Kaggle account at https://www.kaggle.com
+2. Go to https://www.kaggle.com/settings → API → Create New Token
+3. Place the downloaded `kaggle.json` at `~/.kaggle/kaggle.json`
+4. Run: `chmod 600 ~/.kaggle/kaggle.json`
+
+**Download:**
+```bash
+python -m src.data.download
+```
+
+The script is **idempotent** — if `data/raw/` already has 25,000 images, it skips the download. Images are saved as `cat.0.jpg`, `cat.1.jpg`, ..., `dog.0.jpg`, `dog.1.jpg`, etc.
+
+### Step 2 — Set Up DVC (Data Version Control)
+
+DVC tracks large data files outside of git. A small `.dvc` pointer file is committed to git, while the actual data lives in remote storage.
+
+```bash
+# Initialize DVC
+dvc init
+
+# Track the raw data
+dvc add data/raw
+
+# Configure remote storage (Google Drive with service account)
+dvc remote add -d gdrive gdrive://<folder-id>
+dvc remote modify gdrive gdrive_use_service_account true
+dvc remote modify gdrive gdrive_service_account_json_file_path ~/.gdrive/credentials.json
+
+# Or use local storage for quick setup
+dvc remote add -d local /tmp/dvc-storage
+
+# Push data to remote
+dvc push
+```
+
+To reproduce the dataset on another machine:
+```bash
+dvc pull
+```
+
+### Step 3 — Exploratory Data Analysis
+
+Run the EDA notebook to explore the dataset:
+
+```bash
+cd notebooks
+jupyter notebook 01_eda.ipynb
+```
+
+The notebook covers:
+- Class distribution (cats vs dogs count)
+- Image size distribution (width, height, scatter plot)
+- Sample image grid (16 cats, 16 dogs)
+- Corrupted image detection
+- File format and color mode distribution
+- File size distribution
+
+---
+
 ## Tech Stack
 
 | Category | Tool |
