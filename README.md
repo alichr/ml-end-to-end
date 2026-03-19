@@ -98,6 +98,27 @@ The `.editorconfig` ensures consistent formatting across editors (4-space indent
 
 ---
 
+## Phase 2: Data Pipeline
+
+### Step 1 — Download the Dataset
+
+The dataset is the Microsoft Cats vs Dogs dataset (~25,000 images) from Kaggle.
+
+**Prerequisites:**
+1. Create a Kaggle account at https://www.kaggle.com
+2. Go to https://www.kaggle.com/settings → API → Create New Token
+3. Place the downloaded `kaggle.json` at `~/.kaggle/kaggle.json`
+4. Run: `chmod 600 ~/.kaggle/kaggle.json`
+
+**Download:**
+```bash
+python -m src.data.download
+```
+
+The script is **idempotent** — if `data/raw/` already has 25,000 images, it skips the download. Images are saved as `cat.0.jpg`, `cat.1.jpg`, ..., `dog.0.jpg`, `dog.1.jpg`, etc.
+
+---
+
 ## Tech Stack
 
 | Category | Tool |

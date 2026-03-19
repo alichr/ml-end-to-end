@@ -1,5 +1,5 @@
 # Data & models (tracked by DVC, not git)
-data/
+/data/
 models/
 *.onnx
 

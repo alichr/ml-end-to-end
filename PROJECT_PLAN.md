@@ -217,7 +217,7 @@ ml-end-to-end/
 
 ### Tasks
 
-1. **Download the dataset**
+1. ~~**Download the dataset**~~ ✅
    - Kaggle "Dogs vs Cats" dataset (~25,000 images)
    - Write `src/data/download.py` — automated, idempotent download script
 
