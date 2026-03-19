@@ -117,6 +117,34 @@ python -m src.data.download
 
 The script is **idempotent** — if `data/raw/` already has 25,000 images, it skips the download. Images are saved as `cat.0.jpg`, `cat.1.jpg`, ..., `dog.0.jpg`, `dog.1.jpg`, etc.
 
+### Step 2 — Set Up DVC (Data Version Control)
+
+DVC tracks large data files outside of git. A small `.dvc` pointer file is committed to git, while the actual data lives in remote storage.
+
+```bash
+# Initialize DVC
+dvc init
+
+# Track the raw data
+dvc add data/raw
+
+# Configure remote storage (Google Drive with service account)
+dvc remote add -d gdrive gdrive://<folder-id>
+dvc remote modify gdrive gdrive_use_service_account true
+dvc remote modify gdrive gdrive_service_account_json_file_path ~/.gdrive/credentials.json
+
+# Or use local storage for quick setup
+dvc remote add -d local /tmp/dvc-storage
+
+# Push data to remote
+dvc push
+```
+
+To reproduce the dataset on another machine:
+```bash
+dvc pull
+```
+
 ---
 
 ## Tech Stack

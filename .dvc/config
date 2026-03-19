@@ -1,0 +1,8 @@
+[core]
+    remote = local
+['remote "gdrive"']
+    url = gdrive://16ZeL1iup2DMtMpUnXLz_I5JPUwMNfa2K
+    gdrive_use_service_account = true
+    gdrive_service_account_json_file_path = /home/alichr/.gdrive/credentials.json
+['remote "local"']
+    url = /tmp/dvc-storage

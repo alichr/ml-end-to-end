@@ -221,7 +221,7 @@ ml-end-to-end/
    - Kaggle "Dogs vs Cats" dataset (~25,000 images)
    - Write `src/data/download.py` — automated, idempotent download script
 
-2. **Set up DVC (Data Version Control)**
+2. ~~**Set up DVC (Data Version Control)**~~ ✅
    - `dvc init`, configure remote storage (Google Drive or S3 free tier)
    - Track `data/raw/` with DVC
    - Learn: `dvc add`, `dvc push`, `dvc pull`
