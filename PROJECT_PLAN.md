@@ -180,7 +180,7 @@ ml-end-to-end/
 
 ### Tasks
 
-1. **Write `DESIGN_DOC.md`** — a 1-page document containing:
+1. ~~**Write `DESIGN_DOC.md`**~~ ✅
    - **Problem statement:** "Given a photo, classify whether it contains a cat or a dog"
    - **Success criteria:**
      - Accuracy ≥ 95% on test set
@@ -190,14 +190,14 @@ ml-end-to-end/
    - **Out of scope:** multi-class, object detection, video, edge deployment
    - **Risks:** corrupted images in dataset, class imbalance, adversarial inputs
 
-2. **Initialize the repository**
+2. ~~**Initialize the repository**~~ ✅
    - `git init`, create `.gitignore` (data/, models/, *.pyc, .env, etc.)
    - Set up branch strategy: `main` (production), `dev` (integration), `feature/*`
    - Create `pyproject.toml` with all dependencies
 
-3. **Create the folder structure** (as shown above)
+3. ~~**Create the folder structure**~~ ✅ (as shown above)
 
-4. **Set up development environment**
+4. ~~**Set up development environment**~~ ✅
    - Python virtual environment (`uv` or `venv`)
    - Pre-commit hooks: ruff, mypy, trailing whitespace
    - Editor config for consistent formatting
