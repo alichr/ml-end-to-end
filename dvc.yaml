@@ -1,0 +1,21 @@
+stages:
+  download:
+    cmd: python -m src.data.download
+    outs:
+      - data/raw
+
+  validate:
+    cmd: python -m src.data.validate
+    deps:
+      - data/raw
+      - src/data/validate.py
+    outs:
+      - data/processed
+
+  split:
+    cmd: python -m src.data.split
+    deps:
+      - data/processed
+      - src/data/split.py
+    outs:
+      - data/splits

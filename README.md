@@ -162,6 +162,35 @@ The notebook covers:
 - File format and color mode distribution
 - File size distribution
 
+### Step 4 — Data Preprocessing
+
+```bash
+# Validate images: removes corrupted files, converts all to RGB JPEG
+python -m src.data.validate
+
+# Split into train (70%), val (15%), test (15%) — stratified by class
+python -m src.data.split
+```
+
+This creates:
+- `data/processed/` — cleaned images (corrupted ones removed, all converted to RGB)
+- `data/splits/{train,val,test}/{cat,dog}/` — stratified split ready for training
+
+Key files:
+- `src/data/validate.py` — scans and removes corrupted images
+- `src/data/transforms.py` — training (with augmentation) and inference transforms
+- `src/data/split.py` — stratified train/val/test split
+- `src/data/dataset.py` — PyTorch `Dataset` class with lazy loading
+
+### Step 5 — DVC Pipeline
+
+The full data pipeline is defined in `dvc.yaml`: download → validate → split.
+
+```bash
+# Run the entire pipeline (or re-run if inputs change)
+dvc repro
+```
+
 ---
 
 ## Tech Stack

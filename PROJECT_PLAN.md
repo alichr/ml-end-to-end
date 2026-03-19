@@ -234,7 +234,7 @@ ml-end-to-end/
    - Check for corrupted / unreadable images
    - File format distribution (JPEG, PNG, etc.)
 
-4. **Data preprocessing** — `src/data/`
+4. ~~**Data preprocessing**~~ ✅ — `src/data/`
    - `validate.py`: scan for and remove corrupted images
    - `transforms.py`: define training and inference transforms
      ```python
@@ -261,7 +261,7 @@ ml-end-to-end/
    - Split into train (70%), validation (15%), test (15%) — **stratified**
    - `dataset.py`: PyTorch `Dataset` class with lazy loading
 
-5. **Define DVC pipeline** — `dvc.yaml`
+5. ~~**Define DVC pipeline**~~ ✅ — `dvc.yaml`
    - Stage 1: download → Stage 2: validate → Stage 3: split
    - Reproducible with `dvc repro`
 
