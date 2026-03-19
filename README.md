@@ -145,6 +145,23 @@ To reproduce the dataset on another machine:
 dvc pull
 ```
 
+### Step 3 — Exploratory Data Analysis
+
+Run the EDA notebook to explore the dataset:
+
+```bash
+cd notebooks
+jupyter notebook 01_eda.ipynb
+```
+
+The notebook covers:
+- Class distribution (cats vs dogs count)
+- Image size distribution (width, height, scatter plot)
+- Sample image grid (16 cats, 16 dogs)
+- Corrupted image detection
+- File format and color mode distribution
+- File size distribution
+
 ---
 
 ## Tech Stack

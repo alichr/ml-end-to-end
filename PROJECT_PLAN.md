@@ -227,7 +227,7 @@ ml-end-to-end/
    - Learn: `dvc add`, `dvc push`, `dvc pull`
    - **Why DVC matters:** your teammate can reproduce your exact dataset with `dvc pull`
 
-3. **Exploratory Data Analysis (EDA)** — `notebooks/01_eda.ipynb`
+3. ~~**Exploratory Data Analysis (EDA)**~~ ✅ — `notebooks/01_eda.ipynb`
    - Total image count per class (check for imbalance)
    - Image size distribution (min, max, mean width/height)
    - Sample grid: display 16 random cats, 16 random dogs
