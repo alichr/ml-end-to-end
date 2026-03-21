@@ -364,7 +364,7 @@ ml-end-to-end/
 
 ### Tasks
 
-1. **Comprehensive evaluation** — `src/training/evaluate.py`
+1. ~~**Comprehensive evaluation**~~ ✅ — `src/training/evaluate.py`
    - Metrics on the **held-out test set** (never seen during training):
      - Accuracy, Precision, Recall, F1 Score
      - AUC-ROC curve
@@ -372,19 +372,19 @@ ml-end-to-end/
    - **Per-class analysis:** is the model better at cats or dogs?
    - Generate all plots, save as artifacts in MLflow
 
-2. **Error analysis** — `notebooks/03_evaluation.ipynb`
+2. ~~**Error analysis**~~ ✅ — `notebooks/03_evaluation.ipynb`
    - Display the top 20 most confident **wrong** predictions
    - Look for patterns: are failures blurry? occluded? weird angles?
    - This is where you learn what your model actually struggles with
    - Document findings in `MODEL_CARD.md`
 
-3. **Performance benchmarking**
+3. ~~**Performance benchmarking**~~ ✅
    - Measure inference latency: single image on CPU (must be < 200ms)
    - Measure throughput: images per second
    - Measure model file size (must be < 50MB)
    - Memory footprint during inference
 
-4. **Model optimization for production** — `src/model/export.py`
+4. ~~**Model optimization for production**~~ ✅ — `src/model/export.py`
    - Export to **ONNX** format for faster inference
    - Benchmark: PyTorch vs ONNX Runtime latency
    - Optionally: quantize to INT8 (even smaller and faster)
@@ -395,7 +395,7 @@ ml-end-to-end/
                       output_names=["prediction"])
    ```
 
-5. **Write `MODEL_CARD.md`**
+5. ~~**Write `MODEL_CARD.md`**~~ ✅
    - What the model does and doesn't do
    - Training data description
    - Evaluation metrics

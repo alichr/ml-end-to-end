@@ -259,6 +259,59 @@ The best model (`finetune-last3`, 98.4% val accuracy) is registered as `cat-dog-
 
 ---
 
+## Phase 4: Evaluation & Model Optimization
+
+### Step 1 — Comprehensive Evaluation
+
+```bash
+python -m src.training.evaluate
+```
+
+Evaluates the best model on the held-out test set (3,752 images):
+
+| Metric | Value | Target |
+|--------|-------|--------|
+| Accuracy | 98.72% | >= 95% |
+| Precision | 98.72% | — |
+| Recall | 98.72% | — |
+| F1 Score | 98.72% | — |
+| AUC-ROC | 99.92% | — |
+
+Generates plots (confusion matrix, ROC curve, per-class metrics) in `models/evaluation/`.
+
+### Step 2 — Error Analysis
+
+```bash
+cd notebooks
+jupyter notebook 03_evaluation.ipynb
+```
+
+The notebook displays the top 20 most confident wrong predictions, analyzes error patterns by class, and compares confidence distributions for correct vs wrong predictions.
+
+### Step 3 — Performance Benchmarks
+
+| Platform | Latency (mean) | Throughput | Target |
+|----------|---------------|------------|--------|
+| CPU (PyTorch) | 6.6 ms | 152 img/s | < 200 ms |
+| GPU (PyTorch) | 1.0 ms | 973 img/s | — |
+| CPU (ONNX Runtime) | 1.4 ms | 714 img/s | — |
+
+Model size: 8.73 MB (PyTorch), 0.30 MB (ONNX) — target < 50 MB.
+
+### Step 4 — ONNX Export
+
+```bash
+python -m src.model.export
+```
+
+Exports the model to ONNX format, verifies output matches PyTorch, and benchmarks ONNX Runtime inference. The ONNX model is ~4.7x faster than PyTorch on CPU.
+
+### Step 5 — Model Card
+
+See [`MODEL_CARD.md`](MODEL_CARD.md) for full model documentation including intended use, training data, evaluation metrics, known limitations, and usage examples.
+
+---
+
 ## Tech Stack
 
 | Category | Tool |
