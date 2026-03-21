@@ -282,7 +282,7 @@ ml-end-to-end/
 
 ### Tasks
 
-1. **Define the model** — `src/model/classifier.py`
+1. ~~**Define the model**~~ ✅ — `src/model/classifier.py`
    - Use **MobileNetV2** (pretrained on ImageNet)
    - Replace the final classification head with: `Linear(1280, 2)`
    - Why MobileNetV2: small (3.4M params), fast, good accuracy
@@ -297,7 +297,7 @@ ml-end-to-end/
            self.backbone.classifier[1] = nn.Linear(1280, num_classes)
    ```
 
-2. **Write training config** — `configs/train_config.yaml`
+2. ~~**Write training config**~~ ✅ — `configs/train_config.yaml`
    ```yaml
    model:
      name: mobilenet_v2
@@ -320,20 +320,20 @@ ml-end-to-end/
      num_workers: 4
    ```
 
-3. **Write the training loop** — `src/training/train.py`
+3. ~~**Write the training loop**~~ ✅ — `src/training/train.py`
    - Load config from YAML
    - Initialize model, optimizer, scheduler, loss function
    - Training loop with validation after each epoch
    - Save best checkpoint based on validation accuracy
    - Log everything to MLflow
 
-4. **Set up MLflow experiment tracking**
+4. ~~**Set up MLflow experiment tracking**~~ ✅
    - Log per-experiment: hyperparameters, train/val loss curves, final metrics
    - Log artifacts: best model checkpoint, confusion matrix plot
    - **Register the best model** in MLflow Model Registry
    - Learn: `mlflow.log_param()`, `mlflow.log_metric()`, `mlflow.pytorch.log_model()`
 
-5. **Run experiments** (track all in MLflow)
+5. ~~**Run experiments**~~ ✅ (track all in MLflow)
 
    | Experiment | What Changes | Expected Result |
    |-----------|-------------|----------------|
@@ -343,7 +343,7 @@ ml-end-to-end/
    | Batch size | Try 16, 32, 64 | Find sweet spot |
    | Scheduler | Cosine vs StepLR | Marginal improvement |
 
-6. **Pick the best model** using MLflow UI
+6. ~~**Pick the best model**~~ ✅ using MLflow UI
    - Compare runs side by side
    - Select best model → "Promote to Production" in registry
 

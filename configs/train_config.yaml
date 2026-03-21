@@ -1,0 +1,20 @@
+model:
+  name: mobilenet_v2
+  pretrained: true
+  freeze_backbone: true
+  num_classes: 2
+
+training:
+  epochs: 10
+  batch_size: 32
+  learning_rate: 0.001
+  optimizer: adam
+  scheduler: cosine
+  early_stopping_patience: 3
+
+data:
+  image_size: 224
+  train_dir: data/splits/train
+  val_dir: data/splits/val
+  test_dir: data/splits/test
+  num_workers: 4

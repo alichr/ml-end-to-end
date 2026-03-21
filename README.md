@@ -193,6 +193,72 @@ dvc repro
 
 ---
 
+## Phase 3: Model Development & Experiment Tracking
+
+### Step 1 — Define the Model
+
+The classifier uses **MobileNetV2** pretrained on ImageNet with a custom classification head (`Linear(1280, 2)`). The backbone can be fully frozen or partially unfrozen for fine-tuning.
+
+Key file: `src/model/classifier.py`
+
+### Step 2 — Training Config
+
+Training hyperparameters are defined in YAML config files under `configs/`. The default config is `configs/train_config.yaml`.
+
+### Step 3 — Train the Model
+
+```bash
+# Train with default config
+python -m src.training.train
+
+# Train with a specific experiment config
+python -m src.training.train --config configs/experiment_finetune.yaml
+```
+
+The training loop includes:
+- Validation after each epoch
+- Early stopping (patience=3)
+- Best model checkpoint saved to `models/best_model.pth`
+- MLflow logging (params, metrics per epoch, confusion matrix, model artifact)
+
+### Step 4 — MLflow Experiment Tracking
+
+All training runs are logged to MLflow. To view results:
+
+```bash
+mlflow ui
+# Open http://localhost:5000
+```
+
+Each run logs: hyperparameters, per-epoch train/val loss & accuracy, best val accuracy, confusion matrix plot, and the model artifact.
+
+### Step 5 — Run Experiments
+
+Five experiments are configured to compare different training strategies:
+
+```bash
+bash scripts/run_experiments.sh
+```
+
+| Experiment | Config | What Changes | Result |
+|-----------|--------|-------------|--------|
+| Baseline | `experiment_baseline.yaml` | Frozen backbone, lr=0.001 | 97.65% |
+| Fine-tune | `experiment_finetune.yaml` | Unfreeze last 3 layers, lr=0.0001 | **98.40%** |
+| Augmentation | `experiment_augmentation.yaml` | Stronger augmentation | 96.93% |
+| Batch size | `experiment_batch_size.yaml` | Batch size 64 | 97.28% |
+| Scheduler | `experiment_scheduler.yaml` | StepLR instead of cosine | 97.52% |
+
+### Step 6 — Promote the Best Model
+
+```bash
+# Auto-selects the run with highest val accuracy and registers it
+python scripts/promote_model.py
+```
+
+The best model (`finetune-last3`, 98.4% val accuracy) is registered as `cat-dog-classifier` with the `production` alias in MLflow Model Registry.
+
+---
+
 ## Tech Stack
 
 | Category | Tool |
