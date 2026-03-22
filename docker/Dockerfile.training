@@ -1,0 +1,26 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY pyproject.toml .
+
+# Install all dependencies (including training-specific ones)
+RUN pip install --no-cache-dir \
+    torch torchvision mlflow pyyaml Pillow numpy pandas \
+    onnx onnxruntime structlog
+
+# Copy source code
+COPY src/ /app/src/
+COPY configs/ /app/configs/
+
+ENV PYTHONUNBUFFERED=1
+
+# Data and models are mounted as volumes
+VOLUME ["/app/data", "/app/models", "/app/mlruns"]
+
+CMD ["python", "-m", "src.training.train"]

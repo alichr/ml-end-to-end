@@ -482,7 +482,7 @@ ml-end-to-end/
 
 ### Tasks
 
-1. **API Dockerfile** — `docker/Dockerfile.api`
+1. ~~**API Dockerfile**~~ ✅ — `docker/Dockerfile.api`
    - Multi-stage build:
      - Stage 1 (builder): install dependencies
      - Stage 2 (runtime): copy only what's needed
@@ -504,15 +504,15 @@ ml-end-to-end/
    CMD ["uvicorn", "src.serving.app:app", "--host", "0.0.0.0", "--port", "8000"]
    ```
 
-2. **Frontend Dockerfile** — `docker/Dockerfile.frontend`
+2. ~~**Frontend Dockerfile**~~ ✅ — `docker/Dockerfile.frontend`
    - Simpler single-stage build
    - Expose Streamlit port 8501
 
-3. **Training Dockerfile** — `docker/Dockerfile.training`
+3. ~~**Training Dockerfile**~~ ✅ — `docker/Dockerfile.training`
    - Includes GPU support (optional)
    - Mounts data volume
 
-4. **docker-compose.yaml** — orchestrate everything
+4. ~~**docker-compose.yaml**~~ ✅ — orchestrate everything
    ```yaml
    services:
      api:
@@ -543,7 +543,7 @@ ml-end-to-end/
        depends_on: [prometheus]
    ```
 
-5. **Verify the full stack locally**
+5. ~~**Verify the full stack locally**~~ ✅
    - `docker compose up` — everything starts and connects
    - Frontend can call API, Prometheus scrapes metrics, Grafana shows dashboard
 

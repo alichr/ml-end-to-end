@@ -404,6 +404,231 @@ pytest tests/ -v
 
 ---
 
+## Phase 6: Containerization (Docker)
+
+### What is Docker and Why Do We Need It?
+
+Without Docker, anyone who wants to run this project needs to install Python 3.11, torch, fastapi, onnxruntime, and dozens of other packages — and hope the versions don't conflict. Docker solves this by packaging the app and **all its dependencies** into a self-contained box called a **container**.
+
+Key concepts:
+- **Image** — a snapshot of your app + everything it needs (like a template)
+- **Container** — a running copy of an image (like a running program)
+- **Dockerfile** — a recipe that tells Docker how to build an image
+- **docker-compose** — a tool that starts multiple containers at once and connects them
+
+### Project Containers
+
+This project uses 4 containers that work together:
+
+```
+                    ┌──────────────────────────────────────────────┐
+                    │              Docker Network                   │
+                    │                                              │
+ You ──> :8501 ──> │  ┌──────────┐        ┌──────────┐           │
+ (browser)         │  │ Frontend │──HTTP──>│   API    │           │
+                   │  │ Streamlit│        │ FastAPI  │           │
+                   │  │  :8501   │        │  :8000   │           │
+                   │  └──────────┘        └────┬─────┘           │
+                   │                           │ /metrics        │
+                   │                      ┌────┴─────┐           │
+ You ──> :9090 ──> │                      │Prometheus│           │
+                   │                      │  :9090   │           │
+                   │                      └────┬─────┘           │
+                   │                           │                 │
+ You ──> :3000 ──> │                      ┌────┴─────┐           │
+                   │                      │ Grafana  │           │
+                   │                      │  :3000   │           │
+                   │                      └──────────┘           │
+                    └──────────────────────────────────────────────┘
+```
+
+| Container | Image | Port | What It Does |
+|-----------|-------|------|-------------|
+| **api** | `docker/Dockerfile.api` | 8000 | Runs the FastAPI prediction server with ONNX model |
+| **frontend** | `docker/Dockerfile.frontend` | 8501 | Runs the Streamlit UI |
+| **prometheus** | `prom/prometheus` (official) | 9090 | Scrapes `/metrics` from the API every 15s |
+| **grafana** | `grafana/grafana` (official) | 3000 | Displays monitoring dashboards |
+
+### Step 1 — Install Docker
+
+```bash
+# Ubuntu/Debian
+sudo apt-get update
+sudo apt-get install docker.io docker-compose-v2
+
+# Start Docker and enable it on boot
+sudo systemctl start docker
+sudo systemctl enable docker
+
+# Allow your user to run Docker without sudo
+sudo usermod -aG docker $USER
+# IMPORTANT: Log out and log back in for this to take effect
+
+# Verify installation
+docker --version
+docker compose version
+```
+
+### Step 2 — Build the Images
+
+Building an image reads the Dockerfile and installs everything. This only needs to be done once (or when code changes).
+
+```bash
+# Build the API image (multi-stage: installs deps, then copies only what's needed)
+# The "." at the end means "use current directory as context"
+docker build -f docker/Dockerfile.api -t ml-end-to-end-api .
+
+# Build the frontend image
+docker build -f docker/Dockerfile.frontend -t ml-end-to-end-frontend .
+```
+
+This takes a few minutes the first time. Subsequent builds are faster because Docker caches layers.
+
+**Image sizes (what we achieved):**
+
+| Image | Size | Target |
+|-------|------|--------|
+| API | 380 MB | < 1 GB |
+| Frontend | 549 MB | — |
+
+### Step 3 — Start All Services
+
+```bash
+# Start all 4 containers in the background
+docker compose up --no-build -d
+
+# Or start with live logs (Ctrl+C to stop viewing logs, containers keep running)
+docker compose up --no-build
+```
+
+What this does:
+1. Creates a virtual network so containers can talk to each other
+2. Starts the API container (waits for it to be healthy)
+3. Starts the frontend container (waits for API to be ready first)
+4. Starts Prometheus and Grafana
+
+### Step 4 — Verify Everything Works
+
+```bash
+# Check that all 4 containers are running
+docker compose ps
+
+# Test the API health
+curl http://localhost:8000/health
+
+# Classify an image
+curl -X POST http://localhost:8000/predict \
+  -F "file=@data/splits/test/cat/cat.10000.jpg"
+```
+
+Open in your browser:
+- **http://localhost:8501** — Streamlit frontend (upload images here)
+- **http://localhost:8000/docs** — Swagger API docs (try the API interactively)
+- **http://localhost:9090** — Prometheus (type `prediction_requests_total` to see metrics)
+- **http://localhost:3000** — Grafana dashboard (login: admin / admin)
+
+### Step 5 — Useful Docker Commands
+
+**Viewing containers and logs:**
+```bash
+# See running containers
+docker compose ps
+
+# See logs from all services
+docker compose logs
+
+# Follow logs from the API in real-time
+docker compose logs -f api
+
+# Follow logs from the frontend
+docker compose logs -f frontend
+```
+
+**Getting inside a container (for debugging):**
+```bash
+# Open a shell inside the API container
+docker compose exec api bash
+
+# Once inside, you can explore:
+ls /app/              # see the app files
+ls /app/models/       # see the model files
+python -c "import onnxruntime; print('ONNX Runtime works!')"
+exit                  # leave the container
+```
+
+**Stopping and cleaning up:**
+```bash
+# Stop all containers (keeps data)
+docker compose down
+
+# Stop and delete all data volumes (completely fresh start)
+docker compose down -v
+
+# Remove unused images to free disk space
+docker system prune
+```
+
+**Rebuilding after code changes:**
+```bash
+# If you change Python code, rebuild the affected image:
+docker build -f docker/Dockerfile.api -t ml-end-to-end-api .
+
+# Then restart just that service:
+docker compose up -d --no-build
+```
+
+### How the Dockerfiles Work
+
+**`docker/Dockerfile.api`** uses a multi-stage build to keep the image small:
+
+```
+Stage 1 "builder"              Stage 2 "runtime" (final image)
+┌────────────────────┐         ┌────────────────────┐
+│ python:3.11-slim   │         │ python:3.11-slim   │
+│ + gcc              │         │ + installed packages│ (copied from builder)
+│ + pip install all  │ ──────> │ + src/ code         │
+│   dependencies     │  copy   │ + model.onnx        │
+│ (large, ~1GB)      │ only    │ + non-root user     │
+└────────────────────┘ pkgs    └────────────────────┘
+   Thrown away                    Final: 380 MB
+```
+
+The builder stage installs everything (including build tools like gcc). The runtime stage only copies the installed Python packages — no source code for dependencies, no build tools. This makes the final image much smaller.
+
+**`docker/Dockerfile.frontend`** is simpler — single stage since Streamlit doesn't need compilation.
+
+**`docker/Dockerfile.training`** mounts data as volumes so you can train without baking 25,000 images into the image.
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `docker/Dockerfile.api` | Multi-stage build for the API server (380 MB) |
+| `docker/Dockerfile.frontend` | Streamlit frontend container |
+| `docker/Dockerfile.training` | Training environment with volume mounts |
+| `docker-compose.yaml` | Defines all 4 services and how they connect |
+| `prometheus/prometheus.yml` | Tells Prometheus to scrape API metrics every 15s |
+| `grafana/provisioning/` | Auto-configures Grafana with Prometheus datasource |
+| `grafana/dashboards/ml_monitoring.json` | Pre-built dashboard with 9 panels |
+
+### Grafana Dashboard Panels
+
+The pre-configured dashboard at http://localhost:3000 includes:
+
+| Panel | What It Shows |
+|-------|-------------|
+| Request Rate | Predictions per second over time |
+| Error Rate | Percentage of failed requests |
+| Latency Percentiles | p50, p95, p99 response times |
+| Predictions by Class | Pie chart of cat vs dog predictions |
+| Confidence Distribution | How confident the model is |
+| Active Requests | Current concurrent requests |
+| Total Requests | Cumulative successful predictions |
+| Model Version | Which model version is running |
+| Avg Latency | Average response time (5-minute window) |
+
+---
+
 ## Tech Stack
 
 | Category | Tool |

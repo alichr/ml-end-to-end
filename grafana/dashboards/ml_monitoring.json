@@ -1,0 +1,212 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "title": "Request Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        {
+          "expr": "rate(prediction_requests_total[5m])",
+          "legendFormat": "{{predicted_class}} - {{status}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": { "drawStyle": "line", "fillOpacity": 20 }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Error Rate",
+      "type": "stat",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        {
+          "expr": "sum(rate(prediction_requests_total{status!=\"success\"}[5m])) / sum(rate(prediction_requests_total[5m])) * 100",
+          "legendFormat": "Error %"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "red", "value": 5 }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Latency Percentiles",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, rate(prediction_latency_seconds_bucket[5m]))",
+          "legendFormat": "p50"
+        },
+        {
+          "expr": "histogram_quantile(0.95, rate(prediction_latency_seconds_bucket[5m]))",
+          "legendFormat": "p95"
+        },
+        {
+          "expr": "histogram_quantile(0.99, rate(prediction_latency_seconds_bucket[5m]))",
+          "legendFormat": "p99"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": { "drawStyle": "line", "fillOpacity": 10 }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Predictions by Class",
+      "type": "piechart",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        {
+          "expr": "sum by (predicted_class) (prediction_requests_total{status=\"success\"})",
+          "legendFormat": "{{predicted_class}}"
+        }
+      ],
+      "fieldConfig": { "defaults": {}, "overrides": [] }
+    },
+    {
+      "title": "Confidence Distribution",
+      "type": "histogram",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        {
+          "expr": "prediction_confidence_bucket",
+          "legendFormat": "{{le}}"
+        }
+      ],
+      "fieldConfig": { "defaults": {}, "overrides": [] }
+    },
+    {
+      "title": "Active Requests",
+      "type": "gauge",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        {
+          "expr": "active_requests",
+          "legendFormat": "Active"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 20 },
+              { "color": "red", "value": 50 }
+            ]
+          },
+          "max": 100
+        },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Total Requests",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        {
+          "expr": "sum(prediction_requests_total{status=\"success\"})",
+          "legendFormat": "Total Successful"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "none" },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Model Version",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 8, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        {
+          "expr": "model_info",
+          "legendFormat": "v{{version}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "none" },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Avg Latency (5m)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "targets": [
+        {
+          "expr": "rate(prediction_latency_seconds_sum[5m]) / rate(prediction_latency_seconds_count[5m])",
+          "legendFormat": "Avg Latency"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.1 },
+              { "color": "red", "value": 0.2 }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["ml", "monitoring", "cat-dog"],
+  "templating": {
+    "list": [
+      {
+        "current": { "selected": false, "text": "Prometheus", "value": "Prometheus" },
+        "hide": 0,
+        "includeAll": false,
+        "name": "DS_PROMETHEUS",
+        "options": [],
+        "query": "prometheus",
+        "type": "datasource"
+      }
+    ]
+  },
+  "time": { "from": "now-1h", "to": "now" },
+  "title": "Cat vs Dog Classifier — ML Monitoring",
+  "uid": "cat-dog-ml-monitoring",
+  "version": 1
+}

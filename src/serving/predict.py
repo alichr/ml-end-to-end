@@ -7,10 +7,12 @@ import numpy as np
 import onnxruntime as ort
 from PIL import Image
 
-from src.data.transforms import IMAGENET_MEAN, IMAGENET_STD
-
 CLASS_NAMES = {0: "cat", 1: "dog"}
 MODEL_VERSION = "1.0.0"
+
+# ImageNet normalization (must match training — see src/data/transforms.py)
+IMAGENET_MEAN = [0.485, 0.456, 0.406]
+IMAGENET_STD = [0.229, 0.224, 0.225]
 
 # Image preprocessing constants (must match training)
 IMAGE_SIZE = 256
