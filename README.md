@@ -312,6 +312,98 @@ See [`MODEL_CARD.md`](MODEL_CARD.md) for full model documentation including inte
 
 ---
 
+## Phase 5: API & Serving Layer
+
+### Step 1 — API Schemas
+
+Pydantic models define the API contract in `src/serving/schemas.py`:
+
+- `PredictionResponse` — predicted class, confidence, probabilities, model version, latency
+- `BatchPredictionResponse` — list of predictions with total latency
+- `HealthResponse` — status, model loaded, version, uptime
+- `ErrorResponse` — standardized error format with request ID
+
+### Step 2 — Inference Engine
+
+The `Predictor` class (`src/serving/predict.py`) loads the ONNX model and runs inference:
+
+- Preprocesses images with the same pipeline as training (Resize → CenterCrop → Normalize)
+- Handles edge cases: grayscale, RGBA, very small, and very large images
+- Supports both single and batch prediction
+- Pure numpy preprocessing — no PyTorch dependency at serving time
+
+### Step 3 — FastAPI Application
+
+```bash
+# Start the API server
+uvicorn src.serving.app:app --reload
+```
+
+**Endpoints:**
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/predict` | Classify a single image |
+| `POST` | `/predict/batch` | Classify up to 16 images at once |
+| `GET` | `/health` | Health check (model status, uptime) |
+| `GET` | `/metrics` | Prometheus metrics |
+| `GET` | `/docs` | Interactive Swagger UI (auto-generated) |
+
+**Example:**
+```bash
+curl -X POST http://localhost:8000/predict \
+  -F "file=@cat.jpg" | python -m json.tool
+```
+
+```json
+{
+    "predicted_class": "cat",
+    "confidence": 0.9847,
+    "probabilities": {"cat": 0.9847, "dog": 0.0153},
+    "model_version": "1.0.0",
+    "latency_ms": 3.81
+}
+```
+
+### Step 4 — Middleware
+
+`src/serving/middleware.py` provides production hardening:
+
+- **Input validation** — JPEG/PNG only, max 5 MB file size
+- **Rate limiting** — 100 requests/minute per IP (in-memory)
+- **Request ID** — unique UUID per request via `X-Request-ID` header
+- **CORS** — configured for frontend access
+- **Error handling** — clean JSON errors, no stack traces exposed
+
+### Step 5 — Streamlit Frontend
+
+```bash
+# Start the frontend (API must be running)
+streamlit run src/frontend/app.py
+```
+
+Features:
+- Dark glassmorphism UI with gradient accents
+- Single image and batch upload tabs
+- Animated confidence bars with per-class probabilities
+- Live API health status in sidebar
+- Model specs display (architecture, accuracy, latency)
+
+### Step 6 — Tests
+
+```bash
+# Run all tests (33 tests)
+pytest tests/ -v
+```
+
+| Suite | File | Tests |
+|-------|------|-------|
+| Unit | `tests/unit/test_schemas.py` | Schema validation, confidence range, error models |
+| Unit | `tests/unit/test_predict.py` | Preprocessing shapes, softmax, edge cases (grayscale, RGBA, tiny/large) |
+| Integration | `tests/integration/test_api.py` | Full API pipeline, invalid inputs, batch limits, health, metrics, request ID |
+
+---
+
 ## Tech Stack
 
 | Category | Tool |

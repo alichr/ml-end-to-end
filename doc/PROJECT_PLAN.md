@@ -418,7 +418,7 @@ ml-end-to-end/
 
 ### Tasks
 
-1. **Define API schemas** — `src/serving/schemas.py`
+1. ~~**Define API schemas**~~ ✅ — `src/serving/schemas.py`
    ```python
    class PredictionResponse(BaseModel):
        predicted_class: str          # "cat" or "dog"
@@ -434,33 +434,33 @@ ml-end-to-end/
        uptime_seconds: float
    ```
 
-2. **Build FastAPI application** — `src/serving/app.py`
+2. ~~**Build FastAPI application**~~ ✅ — `src/serving/app.py`
    - `POST /predict` — upload image, get prediction
    - `POST /predict/batch` — upload multiple images (batch inference)
    - `GET /health` — health check
    - `GET /metrics` — Prometheus metrics endpoint
    - Load model once at startup (not per request)
 
-3. **Inference logic** — `src/serving/predict.py`
+3. ~~**Inference logic**~~ ✅ — `src/serving/predict.py`
    - Load ONNX model with ONNX Runtime
    - Apply the same preprocessing as training (inference transforms)
    - Return probabilities via softmax
    - Handle edge cases: grayscale images, RGBA, very small images
 
-4. **API middleware** — `src/serving/middleware.py`
+4. ~~**API middleware**~~ ✅ — `src/serving/middleware.py`
    - **Input validation:** file type (JPEG/PNG only), file size (< 5MB)
    - **Rate limiting:** max 100 requests/minute per IP
    - **CORS:** allow frontend to call the API
    - **Request ID:** unique ID per request for tracing
    - **Error handling:** return clean JSON errors, never expose stack traces
 
-5. **Build Streamlit frontend** — `src/frontend/app.py`
+5. ~~**Build Streamlit frontend**~~ ✅ — `src/frontend/app.py`
    - File upload widget
    - Display uploaded image
    - Show prediction, confidence bar, and latency
    - Show model version and health status
 
-6. **API tests** — `tests/`
+6. ~~**API tests**~~ ✅ — `tests/`
    - Unit tests: schema validation, transforms
    - Integration tests: full request → response with sample image
    - Edge case tests: empty file, wrong format, huge image, concurrent requests
